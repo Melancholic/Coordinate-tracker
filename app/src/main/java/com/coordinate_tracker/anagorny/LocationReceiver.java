@@ -1,15 +1,10 @@
 package com.coordinate_tracker.anagorny;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.savagelook.android.UrlJsonAsyncTask;
 
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
@@ -32,7 +27,7 @@ public class LocationReceiver extends BroadcastReceiver {
     double latitude, longitude, accuracy, speed ;
     private Context context;
     //private final String TARGET_URL="http://10.0.2.2:3000/api/v1/geodata/recive";
-    private final String TARGET_URL="http://coordinate.anagorny.com/api/v1/geodata/recive";
+    private final String TARGET_URL = Configuration.getReciveURL();
     @Override
     public void onReceive(final Context context, final Intent calledIntent){
         this.context=context;

@@ -36,19 +36,8 @@ import java.security.NoSuchAlgorithmException;
  */
 public class LoginActivity extends Activity {
     //private static final String TARGET_URL = "http://10.0.2.2:3000/api/v1/login";
-    private static final String TARGET_URL = "http://coordinate.anagorny.com/api/v1/login";
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello",
-            "bar@example.com:world"
-    };
+    private static final String TARGET_URL = Configuration.getLoginURL();
 
-    /**
-     * The default email to populate the email field with.
-     */
     public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
     /**
@@ -103,11 +92,7 @@ public class LoginActivity extends Activity {
         return true;
     }
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
+
     public void attemptLogin() {
         if (mAuthTask != null) {
             return;
