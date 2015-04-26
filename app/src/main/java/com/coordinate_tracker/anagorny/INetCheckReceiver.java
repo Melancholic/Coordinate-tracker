@@ -18,70 +18,64 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Calendar;
-import java.util.TimeZone;
+import java.util.Map;
 
 /**
  * Created by sosnov on 20.03.15.
  */
-public class LocationReceiver extends BroadcastReceiver {
-    private final String TAG="LOC_RECEIVER";
-    double latitude, longitude, accuracy, speed ;
-    long time;
+public class INetCheckReceiver extends BroadcastReceiver {
+    private final String TAG = "INetCheckReceiver";
     private Context context;
     private SharedPreferences storage;
-    //private final String TARGET_URL="http://10.0.2.2:3000/api/v1/geodata/recive";
     private final String TARGET_URL = Configuration.getReciveURL();
 
-
     @Override
-    public void onReceive(final Context context, final Intent calledIntent){
-        Log.d("LOC_RECEIVER", "Location RECEIVED!");
-        Log.d("TEST CONT loc reciver", context.toString());
+    public void onReceive(final Context context, final Intent calledIntent) {
         this.context = context;
         storage = StorageAdapter.get(context.getApplicationContext()).getLocationsStorage();
-        latitude = calledIntent.getDoubleExtra("latitude", -1);
-        longitude = calledIntent.getDoubleExtra("longitude", -1);
-        accuracy = calledIntent.getDoubleExtra("accuracy", -1);
-        speed = calledIntent.getDoubleExtra("speed", -1);
-        time = calledIntent.getLongExtra("time", Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis());
-        if (calledIntent.getBooleanExtra("need_new_track", false)) {
-            //TO DO make request for create new track
-            Log.d(TAG, "Create new track...");
-        }
         updateRemote();
 
     }
 
-    private void updateRemote()
-    {
-        //TOODO ASYNC TASK
-        Log.d("LOC_RECEIVER","HERE!");
-        LocationSendTask task = new LocationSendTask();
-        task.execute(TARGET_URL);
+    private void updateRemote() {
+        Map<String, String> locations = (Map<String, String>) storage.getAll();
+        Log.d(TAG, "LOCAL: " + locations.toString());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (String key : locations.keySet()) {
+            LocationSendTask task = new LocationSendTask();
+            task.execute(TARGET_URL, key, locations.get(key));
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "LOCAL: " + storage.getAll().toString());
 
     }
 
     private class LocationSendTask extends AsyncTask<String, String, JSONObject> {
+        private String key = null;
+        private String holder;
 
         @Override
-        protected JSONObject doInBackground(String... urls) {
+        protected JSONObject doInBackground(String... args) {
+            this.key = args[1];
+            this.holder = args[2];
             DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost post = new HttpPost(urls[0]);
+            HttpPost post = new HttpPost(args[0]);
             post.addHeader("Authorization", "Token token=" + StorageAdapter.usersStorage().getString(Configuration.AUTH_TOKEN_KEY_NAME, ""));
-            JSONObject holder = new JSONObject();
             String response = null;
             JSONObject json = new JSONObject();
             try {
                 try {
                     json.put("success", false);
                     json.put("info", "Connection failed!");
-                    holder.put("latitude", latitude);
-                    holder.put("longitude", longitude);
-                    holder.put("accuracy", accuracy);
-                    holder.put("speed", speed);
-                    holder.put("time", time);
-                    StringEntity se = new StringEntity(holder.toString());
+                    StringEntity se = new StringEntity(holder);
                     post.setEntity(se);
                     post.setHeader("Accept", "application/json");
                     post.setHeader("Content-Type", "application/json");
@@ -90,8 +84,8 @@ public class LocationReceiver extends BroadcastReceiver {
                     response = client.execute(post, responseHandler);
                     json = new JSONObject(response);
                 } catch (UnknownHostException e) {
-                    storage.edit().putString(String.valueOf(time), holder.toString()).commit();
-                    Log.e("NET ", storage.getAll().toString());
+                    e.printStackTrace();
+                    Log.e("Unknow host!", "" + e);
                 } catch (HttpResponseException e) {
                     e.printStackTrace();
                     Log.e("ClientProtocol", "" + e);
@@ -108,16 +102,17 @@ public class LocationReceiver extends BroadcastReceiver {
         }
 
 
-
         @Override
         protected void onPostExecute(JSONObject json) {
             try {
                 if (!json.getBoolean("success")) {
-                    Log.e(TAG, "Server return error: \""+json.getString("info")+"\"");
-                }else{
-                    Log.i(TAG, "Success: "+json.getString("info"));
+                    Log.e(TAG, "Server return error: \"" + json.getString("info") + "\"");
+                } else {
+                    Log.i(TAG, "Success: " + json.getString("info"));
+                    storage.edit().remove(key).commit();
                 }
             } catch (Exception e) {
+
                 e.printStackTrace();
             } finally {
                 super.onPostExecute(json);
@@ -125,8 +120,6 @@ public class LocationReceiver extends BroadcastReceiver {
             }
         }
     }
-
-
 
 
 }

@@ -36,11 +36,23 @@
             android:exported="true"
             android:process=".coordinate_service">
         </service>
+        <service
+            android:name="com.coordinate_tracker.anagorny.INetCheckService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=".coordinate_service"></service>
         <receiver
             android:enabled="true"
             android:name=".LocationReceiver" >
             <intent-filter >
                 <action android:name="coordinate.tracker.intent.action.LOCATION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:enabled="true"
+            android:name=".INetCheckReceiver">
+            <intent-filter>
+                <action android:name="coordinate.tracker.intent.action.INET_ON" />
             </intent-filter>
         </receiver>
     </application>

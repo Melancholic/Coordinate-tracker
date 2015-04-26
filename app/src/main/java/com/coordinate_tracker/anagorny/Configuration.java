@@ -4,7 +4,7 @@ package com.coordinate_tracker.anagorny;
  * Created by sosnov on 17.03.15.
  */
 public class Configuration {
-    public static String ID= CoordinateTracker.userStore.getString(Configuration.UUID_TOKEN_KEY_NAME,"");
+    public static String ID = StorageAdapter.usersStorage().getString(Configuration.UUID_TOKEN_KEY_NAME, "");
     public final static String PRIVATE_STORE_NAME="CurrentUser";
     public final static String AUTH_TOKEN_KEY_NAME="AuthToken";
     public final static String UUID_TOKEN_KEY_NAME="UUID";
@@ -41,5 +41,13 @@ public class Configuration {
 
     public static String getURL(String protocol, String host, int port, String action) {
         return protocol + "://" + host + ":" + port + "/" + action;
+    }
+
+    public static String geRootURL(String protocol, String host, int port) {
+        return protocol + "://" + host + ":" + port;
+    }
+
+    public static String geRootURL() {
+        return DEFAULT_PROTOCOL + "://" + HOST + ":" + DEFAULT_PORT;
     }
 }
