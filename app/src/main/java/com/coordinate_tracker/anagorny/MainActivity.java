@@ -4,14 +4,14 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.*;
-import android.view.View.*;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -96,7 +96,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void init_params() {
-        userStore = CoordinateTracker.userStore; //getSharedPreferences(Configuration.PRIVATE_STORE_NAME, MODE_PRIVATE);
+        userStore = StorageAdapter.usersStorage(); //getSharedPreferences(Configuration.PRIVATE_STORE_NAME, MODE_PRIVATE);
         TextView tv = (TextView) findViewById(R.id.textView1);
         action_area=(LinearLayout)findViewById(R.id.action_area);
         log_out_but=(Button)findViewById(R.id.log_out_but);
@@ -136,6 +136,7 @@ public class MainActivity extends ActionBarActivity {
             }
             tv.append(log.toString());
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
