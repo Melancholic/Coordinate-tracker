@@ -35,7 +35,7 @@ import java.security.NoSuchAlgorithmException;
  * well.
  */
 public class LoginActivity extends Activity {
-    //private static final String TARGET_URL = "http://10.0.2.2:3000/api/v1/login";
+    private final String LOG_TAG = "COORDINATE";
     private static final String TARGET_URL = Configuration.getLoginURL();
 
     public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
@@ -76,7 +76,7 @@ public class LoginActivity extends Activity {
                 return false;
             }
         });
-        devIdView=(EditText) findViewById(R.id.uuid);
+        devIdView = (EditText) findViewById(R.id.uuid);
         findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -92,7 +92,6 @@ public class LoginActivity extends Activity {
         return true;
     }
 
-
     public void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -105,7 +104,7 @@ public class LoginActivity extends Activity {
         // Store values at the time of the login attempt.
         mEmail = mEmailView.getText().toString();
         mPassword = mPasswordView.getText().toString();
-        devId   = devIdView.getText().toString();
+        devId = devIdView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -147,13 +146,14 @@ public class LoginActivity extends Activity {
         }
     }
 
-    private  String bin2hex ( byte [] data )  {
-        return  String . format ( "%0"  +  ( data . length *  2 )  +  'x' , new BigInteger( 1 , data ));
+    private String bin2hex(byte[] data) {
+        return String.format("%0" + (data.length * 2) + 'x', new BigInteger(1, data));
     }
-    private String calculate_hash(){
-        String x= this.mEmail+this.mPassword;
-        MessageDigest digest=null;
-        String hash=null;
+
+    private String calculate_hash() {
+        String x = this.mEmail + this.mPassword;
+        MessageDigest digest = null;
+        String hash = null;
         try {
             digest = MessageDigest.getInstance("SHA-256");
             digest.update(x.getBytes());
@@ -173,13 +173,13 @@ public class LoginActivity extends Activity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    private class UserLoginTask  extends UrlJsonAsyncTask {
+    private class UserLoginTask extends UrlJsonAsyncTask {
         private Context cont;
+
         public UserLoginTask(Context c) {
             super(c);
-            cont=c;
+            cont = c;
         }
-
         @Override
         protected JSONObject doInBackground(String... urls) {
             DefaultHttpClient client = new DefaultHttpClient();
@@ -205,44 +205,36 @@ public class LoginActivity extends Activity {
 
                 } catch (HttpResponseException e) {
                     e.printStackTrace();
-                    Log.e("ClientProtocol", "" + e);
                     json.put("info", "Email and/or password are invalid. Retry!");
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e("IO", "" + e);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-                Log.e("JSON", "" + e);
             }
 
             return json;
         }
 
 
-
         @Override
         protected void onPostExecute(JSONObject json) {
             try {
-                Log.e("JSON:  ",json.toString());
                 if (json.getBoolean("success")) {
-
                     SharedPreferences.Editor editor = MainActivity.userStore.edit();
                     editor.putString(Configuration.AUTH_TOKEN_KEY_NAME, json.getJSONObject("data").getString("api_token"));
                     editor.putString(Configuration.UUID_TOKEN_KEY_NAME, devId);
                     editor.commit();
                 }
-               Toast.makeText(context, json.getString("info"), Toast.LENGTH_LONG).show();
-                Log.e("Auth token: ",MainActivity.userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME, ""));
-
+                Toast.makeText(context, json.getString("info"), Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                ((Activity)context).recreate();
+                ((Activity) context).recreate();
             } finally {
-               super.onPostExecute(json);
+                super.onPostExecute(json);
 
             }
-            ((Activity)LoginActivity.this).finish();
+            ((Activity) LoginActivity.this).finish();
         }
     }
 

@@ -64,6 +64,12 @@
                     android:layout_weight="0.3" />
             </LinearLayout>
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Local Data"
+                android:id="@+id/local_data" />
+
         </LinearLayout>
     </LinearLayout>
 

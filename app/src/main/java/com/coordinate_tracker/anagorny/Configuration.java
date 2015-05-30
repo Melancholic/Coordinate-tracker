@@ -5,15 +5,22 @@ package com.coordinate_tracker.anagorny;
  */
 public class Configuration {
     public static String ID = StorageAdapter.usersStorage().getString(Configuration.UUID_TOKEN_KEY_NAME, "");
-    public final static String PRIVATE_STORE_NAME="CurrentUser";
-    public final static String AUTH_TOKEN_KEY_NAME="AuthToken";
-    public final static String UUID_TOKEN_KEY_NAME="UUID";
-
+    public final static String PRIVATE_STORE_NAME = "CurrentUser";
+    public final static String AUTH_TOKEN_KEY_NAME = "AuthToken";
+    public final static String UUID_TOKEN_KEY_NAME = "UUID";
+    //For production
     private final static String HOST = "coordinate.anagorny.com";
+    private final static int DEFAULT_PORT = 443;
+    private final static String DEFAULT_PROTOCOL = "https";
+    //For development
+    /*private final static String HOST = "10.0.2.2";
+    private final static int DEFAULT_PORT = 3000;
+    private final static String DEFAULT_PROTOCOL = "http";*/
+
     private final static String RECIVE_ACTION = "api/v1/geodata/recive";
     private final static String LOGIN_ACTION = "/api/v1/login";
-    private final static String DEFAULT_PROTOCOL = "http";
-    private final static int DEFAULT_PORT = 80;
+    private final static String PING_ACTION = "/api/v1/ping";
+
 
     public static String getReciveURL() {
         return getURL(RECIVE_ACTION);
@@ -49,5 +56,9 @@ public class Configuration {
 
     public static String geRootURL() {
         return DEFAULT_PROTOCOL + "://" + HOST + ":" + DEFAULT_PORT;
+    }
+
+    public static String getPingURL() {
+        return getURL(PING_ACTION);
     }
 }

@@ -16,17 +16,19 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
 
 public class MainActivity extends ActionBarActivity {
+    private final String LOG_TAG = "COORDINATE";
     private static final String SERVICE_STOP_TEXT = "Kill";
     private static final String SERVICE_START_TEXT = "Start";
     public static SharedPreferences userStore;
     private  Button log_out_but;
     private Button exit_but;
     private Button service_but;
+    private Button local_data_but;
     private LinearLayout action_area;
 
     @Override
@@ -96,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void init_params() {
-        userStore = StorageAdapter.usersStorage(); //getSharedPreferences(Configuration.PRIVATE_STORE_NAME, MODE_PRIVATE);
+        userStore = StorageAdapter.usersStorage();
         TextView tv = (TextView) findViewById(R.id.textView1);
         action_area=(LinearLayout)findViewById(R.id.action_area);
         log_out_but=(Button)findViewById(R.id.log_out_but);
@@ -106,6 +108,13 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 finish();
                 System.exit(0);
+            }
+        });
+        local_data_but = (Button) findViewById(R.id.local_data);
+        local_data_but.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PrintLocal();
             }
         });
         service_but=(Button)findViewById(R.id.kill_button);
@@ -124,20 +133,26 @@ public class MainActivity extends ActionBarActivity {
         });
         tv.setText(Html.fromHtml("<font color='blue'>Device: " + Configuration.ID + "</font><br><hr><br>"));
         tv.setMovementMethod(new ScrollingMovementMethod());
-        try {
-            Process process = Runtime.getRuntime().exec("logcat -d");
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
 
-            StringBuilder log=new StringBuilder();
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                log.append(line);
-            }
-            tv.append(log.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
+        SharedPreferences.Editor editor = userStore.edit();
+        editor.remove(CustomLocationListener.LAST_LATITUDE_TAG);
+        editor.remove(CustomLocationListener.LAST_LONGITUDE_TAG);
+        editor.remove(CustomLocationListener.LAST_ACCURACY_TAG);
+        editor.remove(CustomLocationListener.LAST_TIME_TAG);
+        editor.commit();
+    }
+
+    private void PrintLocal() {
+        TextView tv = (TextView) findViewById(R.id.textView1);
+        tv.append("\n\n===" + Calendar.getInstance().getTime().toString() + "===");
+        SharedPreferences storage = StorageAdapter.get((CoordinateTracker) getApplicationContext()).getLocationsStorage();
+        Map<String, String> locations = (Map<String, String>) storage.getAll();
+        tv.append("\nTOTAL: " + locations.size() + " records \n\n");
+        for (String key : locations.keySet()) {
+            tv.append((new Date(Long.parseLong(key))).toString() + " ==> " + locations.get(key));
+            tv.append("\n");
         }
+        tv.append("\n===============");
     }
 
     private void service_but_list() {

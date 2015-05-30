@@ -11,20 +11,21 @@ import android.os.Looper;
 import android.util.Log;
 
 public class CoordinateService extends Service implements INetCheckService.ConnectionServiceCallback {
-    final String LOG_TAG = "Coordinate-Tracker";
+    private final String LOG_TAG = "COORDINATE";
     public static SharedPreferences userStore;
     private Context context = CoordinateTracker.getAppContext();
+
     public CoordinateService() {
         super();
         userStore = StorageAdapter.usersStorage();
-        if(token_empty()){
-            Log.e(LOG_TAG,"Token is empty!");
+        if (token_empty()) {
+            Log.e(LOG_TAG, "Token is empty!");
             stopSelf();
         }
     }
 
-    private boolean token_empty(){
-        return userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME,"")==null || userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME,"").isEmpty();
+    private boolean token_empty() {
+        return userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME, "") == null || userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME, "").isEmpty();
     }
 
     @Override
@@ -46,7 +47,7 @@ public class CoordinateService extends Service implements INetCheckService.Conne
         // Interval in seconds
         editor.putInt(INetCheckService.TAG_INTERVAL, 30);
         // URL to ping
-        editor.putString(INetCheckService.TAG_URL_PING, Configuration.geRootURL());
+        editor.putString(INetCheckService.TAG_URL_PING, Configuration.getPingURL());
         // Name of the class that is calling this service
         editor.putString(INetCheckService.TAG_ACTIVITY_NAME, this.getClass().getName());
         editor.commit();
@@ -75,12 +76,10 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
 
     void someTask() {
-        //TODO make task
         addLocationListener();
     }
 
-    private void addLocationListener()
-    {
+    private void addLocationListener() {
         Thread triggerService = new Thread(new Runnable() {
             public void run() {
                 try {
@@ -115,7 +114,7 @@ public class CoordinateService extends Service implements INetCheckService.Conne
             context.sendBroadcast(filterRes);
         }
         Log.d("NET", "INET ON");
-        Log.d("NET", "NET  " + CoordinateTracker.isConnected());
+        Log.d(LOG_TAG, "NET  " + CoordinateTracker.isConnected());
     }
 
     @Override
@@ -124,7 +123,7 @@ public class CoordinateService extends Service implements INetCheckService.Conne
         if (CoordinateTracker.isConnected()) {
             StorageAdapter.usersStorage().edit().putBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false).commit();
         }
-        Log.d("NET", "INET OFF");
-        Log.d("NET", "NET  " + CoordinateTracker.isConnected());
+        Log.d(LOG_TAG, "INET OFF");
+        Log.d(LOG_TAG, "NET  " + CoordinateTracker.isConnected());
     }
 }

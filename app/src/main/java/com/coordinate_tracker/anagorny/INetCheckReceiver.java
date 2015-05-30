@@ -24,7 +24,7 @@ import java.util.Map;
  * Created by sosnov on 20.03.15.
  */
 public class INetCheckReceiver extends BroadcastReceiver {
-    private final String TAG = "INetCheckReceiver";
+    private final String LOG_TAG = "COORDINATE";
     private Context context;
     private SharedPreferences storage;
     private final String TARGET_URL = Configuration.getReciveURL();
@@ -39,7 +39,7 @@ public class INetCheckReceiver extends BroadcastReceiver {
 
     private void updateRemote() {
         Map<String, String> locations = (Map<String, String>) storage.getAll();
-        Log.d(TAG, "LOCAL: " + locations.toString());
+        Log.d(LOG_TAG, "LOCAL: " + locations.toString());
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -54,7 +54,7 @@ public class INetCheckReceiver extends BroadcastReceiver {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "LOCAL: " + storage.getAll().toString());
+        Log.d(LOG_TAG, "LOCAL: " + storage.getAll().toString());
 
     }
 
@@ -106,9 +106,9 @@ public class INetCheckReceiver extends BroadcastReceiver {
         protected void onPostExecute(JSONObject json) {
             try {
                 if (!json.getBoolean("success")) {
-                    Log.e(TAG, "Server return error: \"" + json.getString("info") + "\"");
+                    Log.e(LOG_TAG, "Server return error: \"" + json.getString("info") + "\"");
                 } else {
-                    Log.i(TAG, "Success: " + json.getString("info"));
+                    Log.i(LOG_TAG, "Success: " + json.getString("info"));
                     storage.edit().remove(key).commit();
                 }
             } catch (Exception e) {

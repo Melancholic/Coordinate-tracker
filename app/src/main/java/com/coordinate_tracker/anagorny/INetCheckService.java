@@ -19,10 +19,10 @@ import java.util.TimerTask;
 
 /**
  * Based of: https://github.com/oscarjiv91/Android-Check-Internet-Connection
- * Created by Oscar on 20/03/15.
+ * Created by sosnov on 20/03/15.
  */
 public class INetCheckService extends Service {
-    private static final String TAG = "Coordinate-Tracker";
+    private final String LOG_TAG = "COORDINATE";
     public static String TAG_INTERVAL = "interval";
     public static String TAG_URL_PING = "url_ping";
     public static String TAG_ACTIVITY_NAME = "activity_name";
@@ -55,7 +55,7 @@ public class INetCheckService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "OnStart- InetCheck");
+
         interval = userStore.getInt(TAG_INTERVAL, 10);
         url_ping = userStore.getString(TAG_URL_PING, "google.com");
         activity_name = userStore.getString(TAG_ACTIVITY_NAME, "");
@@ -86,7 +86,7 @@ public class INetCheckService extends Service {
     @Override
     public void onDestroy() {
         mTimer.cancel();
-        Log.d(TAG, "onDestroy- InetCheck");
+        Log.d(LOG_TAG, "onDestroy- InetCheck");
         super.onDestroy();
     }
 

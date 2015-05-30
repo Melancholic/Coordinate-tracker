@@ -25,12 +25,11 @@ import java.util.TimeZone;
  * Created by sosnov on 20.03.15.
  */
 public class LocationReceiver extends BroadcastReceiver {
-    private final String TAG="LOC_RECEIVER";
+    private final String LOG_TAG = "COORDINATE";
     double latitude, longitude, accuracy, speed ;
     long time;
     private Context context;
     private SharedPreferences storage;
-    //private final String TARGET_URL="http://10.0.2.2:3000/api/v1/geodata/recive";
     private final String TARGET_URL = Configuration.getReciveURL();
 
 
@@ -47,7 +46,7 @@ public class LocationReceiver extends BroadcastReceiver {
         time = calledIntent.getLongExtra("time", Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis());
         if (calledIntent.getBooleanExtra("need_new_track", false)) {
             //TO DO make request for create new track
-            Log.d(TAG, "Create new track...");
+            Log.d(LOG_TAG, "Create new track...");
         }
         updateRemote();
 
@@ -55,8 +54,6 @@ public class LocationReceiver extends BroadcastReceiver {
 
     private void updateRemote()
     {
-        //TOODO ASYNC TASK
-        Log.d("LOC_RECEIVER","HERE!");
         LocationSendTask task = new LocationSendTask();
         task.execute(TARGET_URL);
 
@@ -85,23 +82,31 @@ public class LocationReceiver extends BroadcastReceiver {
                     post.setEntity(se);
                     post.setHeader("Accept", "application/json");
                     post.setHeader("Content-Type", "application/json");
+                    if (!CoordinateTracker.isConnected()) {
+                        Log.e(LOG_TAG, "Save to local (DISCONNECT)");
+                        storage.edit().putString(String.valueOf(time), holder.toString()).commit();
+                        return json;
+                    }
+                    json.put("time", String.valueOf(time));
+                    json.put("holder", holder.toString());
 
                     ResponseHandler<String> responseHandler = new BasicResponseHandler();
                     response = client.execute(post, responseHandler);
                     json = new JSONObject(response);
                 } catch (UnknownHostException e) {
+                    Log.e(LOG_TAG, "Save to local (UNKNOW HOST)");
                     storage.edit().putString(String.valueOf(time), holder.toString()).commit();
-                    Log.e("NET ", storage.getAll().toString());
+                    Log.e(LOG_TAG, storage.getAll().toString());
                 } catch (HttpResponseException e) {
                     e.printStackTrace();
-                    Log.e("ClientProtocol", "" + e);
+                    Log.e(LOG_TAG, "" + e);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e("IO", "" + e);
+                    Log.e(LOG_TAG, "" + e);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-                Log.e("JSON", "" + e);
+                Log.e(LOG_TAG, "" + e);
             }
 
             return json;
@@ -113,9 +118,10 @@ public class LocationReceiver extends BroadcastReceiver {
         protected void onPostExecute(JSONObject json) {
             try {
                 if (!json.getBoolean("success")) {
-                    Log.e(TAG, "Server return error: \""+json.getString("info")+"\"");
+                    Log.e(LOG_TAG, "Server return error: \"" + json.getString("info") + "\"");
+
                 }else{
-                    Log.i(TAG, "Success: "+json.getString("info"));
+                    Log.i(LOG_TAG, "Success: " + json.getString("info"));
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
  * Created by sosnov on 17.04.15.
  */
 public class StorageAdapter {
+    private final String LOG_TAG = "COORDINATE";
     static private StorageAdapter instance;
     private final SharedPreferences locationStore;
     private SharedPreferences userStore;
@@ -20,16 +21,12 @@ public class StorageAdapter {
     }
 
     static public StorageAdapter get(Context context) {
-        // if (instance==null) {
         instance = new StorageAdapter(context);
-        //    }
         return instance;
     }
 
     static public StorageAdapter get() {
-        //   if (instance==null) {
         instance = new StorageAdapter(CoordinateTracker.getAppContext());
-        //   }
         return instance;
     }
 

@@ -14,7 +14,7 @@ import java.util.TimeZone;
  * Created by sosnov on 20.03.15.
  */
 public class CustomLocationListener implements LocationListener {
-    private static final String TAG = "CustomLocationListener";
+    private final String LOG_TAG = "COORDINATE";
     public static final String LAST_LATITUDE_TAG = "last_latitude";
     public static final String LAST_LONGITUDE_TAG = "last_longitude";
     public static final String LAST_ACCURACY_TAG = "last_accuracy";
@@ -23,7 +23,7 @@ public class CustomLocationListener implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         Context appCtx = CoordinateTracker.getAppContext();
-        Log.d("TEST CONT cstomlocreciv", appCtx.toString());
+        Log.d(LOG_TAG, appCtx.toString());
         double latitude, longitude, speed, accuracy;
         long time;
         Location last_loc = new Location("last location");
@@ -34,33 +34,33 @@ public class CustomLocationListener implements LocationListener {
         Log.e(this.getClass().getName(), "LAST:   " + last_loc.getLatitude() + " " + last_loc.getLongitude());
         Log.e(this.getClass().getName(), "Distance:  " + location.distanceTo(last_loc));
         // if(location.getAccuracy()<30){
-        if (location.getAccuracy() < 10 || location.distanceTo(last_loc) > (location.getAccuracy() + last_loc.getAccuracy()) * 2) { //(location.getAccuracy()+last_loc.getAccuracy())*2
-            //    if(isBetterLocation(location,last_loc)){
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-            speed = location.getSpeed();
-            accuracy = location.getAccuracy();
-            time = Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis();
+        // if (location.getAccuracy() < 10 || location.distanceTo(last_loc) > (location.getAccuracy() + last_loc.getAccuracy()) * 2) { //(location.getAccuracy()+last_loc.getAccuracy())*2
+        //    if(isBetterLocation(location,last_loc)){
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+        speed = location.getSpeed();
+        accuracy = location.getAccuracy();
+        time = Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis();
 
-            Intent filterRes = new Intent();
-            filterRes.setAction("coordinate.tracker.intent.action.LOCATION");
-            filterRes.putExtra("latitude", latitude);
-            filterRes.putExtra("longitude", longitude);
-            filterRes.putExtra("speed", speed);
-            filterRes.putExtra("accuracy", accuracy);
-            filterRes.putExtra("time", time);
-            filterRes.putExtra("need_new_track", (((time - last_loc_time) * 1.0 / 60000) >= 15));
-            appCtx.sendBroadcast(filterRes);
-            Log.d(this.getClass().getName(), "latitude: " + latitude);
-            Log.d(this.getClass().getName(), "longitude: " + longitude);
-            Log.d(this.getClass().getName(), "speed: " + speed);
-            Log.d(this.getClass().getName(), "accuracy: " + accuracy);
-            Log.d(this.getClass().getName(), "provider: " + location.getProvider());
-            saveLastLoc(latitude, longitude, accuracy, time);
-            Log.d(this.getClass().getName(), "Time different: " + ((time - last_loc_time) * 1.0 / 60000));
-        } else {
+        Intent filterRes = new Intent();
+        filterRes.setAction("coordinate.tracker.intent.action.LOCATION");
+        filterRes.putExtra("latitude", latitude);
+        filterRes.putExtra("longitude", longitude);
+        filterRes.putExtra("speed", speed);
+        filterRes.putExtra("accuracy", accuracy);
+        filterRes.putExtra("time", time);
+        filterRes.putExtra("need_new_track", (((time - last_loc_time) * 1.0 / 60000) >= 15));
+        appCtx.sendBroadcast(filterRes);
+        Log.d(this.getClass().getName(), "latitude: " + latitude);
+        Log.d(this.getClass().getName(), "longitude: " + longitude);
+        Log.d(this.getClass().getName(), "speed: " + speed);
+        Log.d(this.getClass().getName(), "accuracy: " + accuracy);
+        Log.d(this.getClass().getName(), "provider: " + location.getProvider());
+        saveLastLoc(latitude, longitude, accuracy, time);
+        Log.d(this.getClass().getName(), "Time different: " + ((time - last_loc_time) * 1.0 / 60000));
+      /*  } else {
             Log.d(this.getClass().getName(), "Accuracy is very hight, location not updated");
-        }
+        }*/
     }
 
     private void saveLastLoc(double latitude, double longitude, double accuracy, long time) {
@@ -80,12 +80,12 @@ public class CustomLocationListener implements LocationListener {
 
     @Override
     public void onProviderEnabled(String provider) {
-        Log.d(TAG, "GPS eanbled");
+        Log.d(LOG_TAG, "GPS eanbled");
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        Log.d(TAG, "GPS disabled");
+        Log.d(LOG_TAG, "GPS disabled");
     }
 
     private static final int FIVE_SECONDS = 1000 * 5;
@@ -101,7 +101,6 @@ public class CustomLocationListener implements LocationListener {
             // A new location is always better than no location
             return true;
         }
-
         // Check whether the new location fix is newer or older
         long timeDelta = location.getTime() - currentBestLocation.getTime();
         boolean isSignificantlyNewer = timeDelta > FIVE_SECONDS;
@@ -116,7 +115,6 @@ public class CustomLocationListener implements LocationListener {
         } else if (isSignificantlyOlder) {
             return false;
         }
-
         // Check whether the new location fix is more or less accurate
         int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
         boolean isLessAccurate = accuracyDelta > 0;
@@ -138,9 +136,7 @@ public class CustomLocationListener implements LocationListener {
         return false;
     }
 
-    /**
-     * Checks whether two providers are the same
-     */
+
     private boolean isSameProvider(String provider1, String provider2) {
         if (provider1 == null) {
             return provider2 == null;
