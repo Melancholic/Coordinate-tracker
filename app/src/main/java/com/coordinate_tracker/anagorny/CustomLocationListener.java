@@ -98,20 +98,19 @@ public class CustomLocationListener implements LocationListener {
      */
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
         if (currentBestLocation == null) {
-            // A new location is always better than no location
+            //Новые кооординаты, всегда лучше отсуствующих
             return true;
         }
-        // Check whether the new location fix is newer or older
+        // Новые координаты новее?
         long timeDelta = location.getTime() - currentBestLocation.getTime();
         boolean isSignificantlyNewer = timeDelta > FIVE_SECONDS;
         boolean isSignificantlyOlder = timeDelta < -FIVE_SECONDS;
         boolean isNewer = timeDelta > 0;
 
-        // If it's been more than two minutes since the current location, use the new location
-        // because the user has likely moved
+        //Если разница более 5 сек, использовать новые
         if (isSignificantlyNewer) {
             return true;
-            // If the new location is more than two minutes older, it must be worse
+            // Если новые координаты старше 5 минут, то они устаревшие
         } else if (isSignificantlyOlder) {
             return false;
         }
@@ -121,11 +120,12 @@ public class CustomLocationListener implements LocationListener {
         boolean isMoreAccurate = accuracyDelta < 0;
         boolean isSignificantlyLessAccurate = accuracyDelta > 200;
 
-        // Check if the old and new location are from the same provider
+        // Новые координаты точнее старого?
         boolean isFromSameProvider = isSameProvider(location.getProvider(),
                 currentBestLocation.getProvider());
 
-        // Determine location quality using a combination of timeliness and accuracy
+        //Определение окончательного результата,
+        //опираясь на точность и актуальность
         if (isMoreAccurate) {
             return true;
         } else if (isNewer && !isLessAccurate) {

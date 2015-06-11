@@ -39,6 +39,9 @@ public class CoordinateService extends Service implements INetCheckService.Conne
         Log.d(LOG_TAG, "onCreate");
         Log.d("TEST CONT", context.toString());
         startInetCheck();
+        Intent filterRes = new Intent();
+        filterRes.setAction("coordinate.tracker.intent.action.INET_ON");
+        context.sendBroadcast(filterRes);
     }
 
     private void startInetCheck() {
@@ -63,6 +66,7 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
     public void onDestroy() {
         super.onDestroy();
+        StorageAdapter.usersStorage().edit().putBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false).commit();
         stopService(new Intent(this, INetCheckService.class));
         StorageAdapter.get(context).getUsersStorage().edit()
                 .remove(CustomLocationListener.LAST_LATITUDE_TAG)

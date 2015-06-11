@@ -31,6 +31,7 @@ public class INetCheckReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent calledIntent) {
+        Log.d(LOG_TAG, "CREATE- INetCheckReceiver");
         this.context = context;
         storage = StorageAdapter.get(context.getApplicationContext()).getLocationsStorage();
         updateRemote();
