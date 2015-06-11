@@ -82,11 +82,7 @@ public class LocationReceiver extends BroadcastReceiver {
                     post.setEntity(se);
                     post.setHeader("Accept", "application/json");
                     post.setHeader("Content-Type", "application/json");
-                    /*if (!CoordinateTracker.isConnected()) {
-                        Log.e(LOG_TAG, "Save to local (DISCONNECT)");
-                        storage.edit().putString(String.valueOf(time), holder.toString()).commit();
-                        return json;
-                    }*/
+
                     json.put("time", String.valueOf(time));
                     json.put("holder", holder.toString());
 
