@@ -25,9 +25,9 @@ import okhttp3.Response;
  */
 public class LocationReceiver extends BroadcastReceiver {
     private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
-    double latitude, longitude;
-    short speed, accuracy;
-    long time;
+    private double latitude, longitude;
+    private short speed, accuracy;
+    private long time;
     private Context context;
     private SharedPreferences storage;
     private final String TARGET_URL = Configuration.getReciveURL();

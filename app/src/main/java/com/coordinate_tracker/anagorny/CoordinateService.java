@@ -2,6 +2,7 @@ package com.coordinate_tracker.anagorny;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -40,11 +41,20 @@ public class CoordinateService extends Service implements INetCheckService.Conne
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotifyBuilder = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText("status:");
+                .setContentTitle(getString(R.string.app_name));
         NotifyID = new AtomicInteger(0).incrementAndGet();
 
         Notification notification = NotifyBuilder.build();
+
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(context,
+                0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        NotifyBuilder.setContentIntent(contentIntent);
+
         startForeground(NotifyID, notification);
 
         Log.d(LOG_TAG, "onCreate");
@@ -98,16 +108,10 @@ public class CoordinateService extends Service implements INetCheckService.Conne
                 .remove(CustomLocationListener.LAST_LONGITUDE_TAG)
                 .remove(CustomLocationListener.LAST_ACCURACY_TAG)
                 .remove(CustomLocationListener.LAST_TIME_TAG)
+                .remove(CustomLocationListener.LAST_CITY_TAG)
+                .remove(CustomLocationListener.LAST_SPEED_TAG)
                 .apply();
         Log.d(LOG_TAG, "onDestroy");
-    }
-
-    public CoordinateLocation getLastLocation() {
-        CoordinateLocation lastLoc = new CoordinateLocation(
-                userStore.getFloat(CustomLocationListener.LAST_LATITUDE_TAG, -1f),
-                userStore.getFloat(CustomLocationListener.LAST_LONGITUDE_TAG, -1f)
-        );
-        return lastLoc;
     }
 
     class NotifyUpdater extends TimerTask {
@@ -132,10 +136,33 @@ public class CoordinateService extends Service implements INetCheckService.Conne
     //TODO
     private void IsNotifyNeedUpdate() {
         try {
-            NotifyBuilder.setContentText(CoordinateTracker.isConnected() ? "Connected" : "Connecting....");
-            //Log.e (LOG_TAG, );
-            // Because the ID remains unchanged, the existing notification is
-            // updated.
+
+            NotifyBuilder.setWhen(System.currentTimeMillis());
+            String content = "Status: ";
+            String info ="";
+            String city = userStore.getString(CustomLocationListener.LAST_CITY_TAG, "");
+            short speed = (short)userStore.getInt(CustomLocationListener.LAST_SPEED_TAG, 0);
+            int localStoreSize = StorageAdapter.get().getLocationsStorage().getAll().size();
+
+            if(CoordinateTracker.isConnected()) {
+                content += "Connected";
+            } else {
+                content += "Connecting...";
+            }
+
+            if (localStoreSize > 0){
+                content += " ("+localStoreSize+" records not synced)";
+            }
+
+            if (!city.isEmpty()){
+                info += city + ", ";
+            }
+
+            info += speed + " km/h";
+
+            NotifyBuilder.setContentText(content);
+            NotifyBuilder.setContentInfo(info);
+
             mNotificationManager.notify(
                     NotifyID,
                     NotifyBuilder.build()

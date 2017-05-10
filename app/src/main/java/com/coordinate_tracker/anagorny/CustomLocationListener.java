@@ -3,12 +3,17 @@ package com.coordinate_tracker.anagorny;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -20,6 +25,11 @@ public class CustomLocationListener implements LocationListener {
     public static final String LAST_LONGITUDE_TAG = "last_longitude";
     public static final String LAST_ACCURACY_TAG = "last_accuracy";
     public static final String LAST_TIME_TAG = "last_time";
+    public static final String LAST_CITY_TAG = "last_city";
+    public static final String LAST_SPEED_TAG = "last_speed";
+
+    private Geocoder geocoder = new Geocoder(CoordinateTracker.getAppContext(), Locale.getDefault());
+
     private SharedPreferences userStore = StorageAdapter.usersStorage();
 
     @Override
@@ -34,7 +44,6 @@ public class CustomLocationListener implements LocationListener {
         last_loc.setLongitude(Double.parseDouble(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_LONGITUDE_TAG, String.valueOf(location.getLongitude()))));
         last_loc.setAccuracy(Float.parseFloat(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_ACCURACY_TAG, String.valueOf(location.getAccuracy()))));
         long last_loc_time = Long.parseLong(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_TIME_TAG, "0"));
-
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         speed = (short)Math.round(location.getSpeed());
@@ -52,19 +61,28 @@ public class CustomLocationListener implements LocationListener {
             filterRes.putExtra("time", time);
             filterRes.putExtra("need_new_track", (((time - last_loc_time) * 1.0 / 60000) >= 15));
             appCtx.sendBroadcast(filterRes);
-            saveLastLoc(latitude, longitude, accuracy, time);
+            saveLastLoc(latitude, longitude, accuracy, time, speed);
             Log.d(LOG_TAG, "Geodata received and successfully sended to handler");
         } else {
             Log.d(LOG_TAG, "Geodata received, but speed is zero, skip...");
         }
     }
 
-    private void saveLastLoc(double latitude, double longitude, double accuracy, long time) {
+    private void saveLastLoc(double latitude, double longitude, double accuracy, long time, short speed) {
         Context appCtx = CoordinateTracker.getAppContext();
+        String city;
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            city = addresses.get(0).getLocality();
+        } catch (IOException e) {
+            city = null;
+        }
         userStore.edit()
                 .putString(LAST_LATITUDE_TAG, String.valueOf(latitude))
                 .putString(LAST_LONGITUDE_TAG, String.valueOf(longitude))
                 .putString(LAST_ACCURACY_TAG, String.valueOf(accuracy))
+                .putString(LAST_CITY_TAG, city)
+                .putInt(LAST_SPEED_TAG, speed)
                 .putString(LAST_TIME_TAG, String.valueOf(time)).apply();
     }
 
