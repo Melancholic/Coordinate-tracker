@@ -2,13 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    buildToolsVersion '25.0.0'
     defaultConfig {
         applicationId "com.anagorny.coordinate_tracker"
-        minSdkVersion 10
+        minSdkVersion 19
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName '2.0'
+        versionNameSuffix '-alpha'
     }
     buildTypes {
         release {
@@ -21,6 +22,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.squareup.okhttp3:okhttp:3.7.0'
 }

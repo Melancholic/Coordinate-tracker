@@ -6,16 +6,13 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 /**
  * Based of: https://github.com/oscarjiv91/Android-Check-Internet-Connection
@@ -91,25 +88,29 @@ public class INetCheckService extends Service {
     }
 
     private boolean isNetworkAvailable() {
-        HttpGet httpGet = new HttpGet(url_ping);
-        HttpParams httpParameters = new BasicHttpParams();
 
-        int timeoutConnection = 5000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .connectTimeout(5000, TimeUnit.MILLISECONDS)
+                .readTimeout(7000, TimeUnit.MILLISECONDS)
+                .build();
 
-        int timeoutSocket = 7000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+        Request request = new Request.Builder()
+                .addHeader("Accept", "application/json")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Token token=" + StorageAdapter.usersStorage().getString(Configuration.AUTH_TOKEN_KEY_NAME, ""))
+                .url(url_ping)
+                .get()
+                .build();
 
-        DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
         try {
-            httpClient.execute(httpGet);
+            client.newCall(request).execute();
+            // PING - OK
             mConnectionServiceCallback.hasInternetConnection();
             return true;
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // NO PING
         mConnectionServiceCallback.hasNoInternetConnection();
         return false;
     }

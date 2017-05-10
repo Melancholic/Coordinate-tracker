@@ -24,7 +24,8 @@ public class CustomLocationListener implements LocationListener {
     public void onLocationChanged(Location location) {
         Context appCtx = CoordinateTracker.getAppContext();
         Log.d(LOG_TAG, appCtx.toString());
-        double latitude, longitude, speed, accuracy;
+        double latitude, longitude;
+        short speed, accuracy;
         long time;
         Location last_loc = new Location("last location");
         last_loc.setLatitude(Double.parseDouble(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_LATITUDE_TAG, String.valueOf(location.getLatitude()))));
@@ -33,34 +34,34 @@ public class CustomLocationListener implements LocationListener {
         long last_loc_time = Long.parseLong(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_TIME_TAG, "0"));
         Log.e(this.getClass().getName(), "LAST:   " + last_loc.getLatitude() + " " + last_loc.getLongitude());
         Log.e(this.getClass().getName(), "Distance:  " + location.distanceTo(last_loc));
-        // if(location.getAccuracy()<30){
-        // if (location.getAccuracy() < 10 || location.distanceTo(last_loc) > (location.getAccuracy() + last_loc.getAccuracy()) * 2) { //(location.getAccuracy()+last_loc.getAccuracy())*2
-        //    if(isBetterLocation(location,last_loc)){
+
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        speed = location.getSpeed();
-        accuracy = location.getAccuracy();
+        speed = (short)Math.round(location.getSpeed());
+        accuracy = (short)Math.round(location.getAccuracy());
         time = Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis();
 
-        Intent filterRes = new Intent();
-        filterRes.setAction("coordinate.tracker.intent.action.LOCATION");
-        filterRes.putExtra("latitude", latitude);
-        filterRes.putExtra("longitude", longitude);
-        filterRes.putExtra("speed", speed);
-        filterRes.putExtra("accuracy", accuracy);
-        filterRes.putExtra("time", time);
-        filterRes.putExtra("need_new_track", (((time - last_loc_time) * 1.0 / 60000) >= 15));
-        appCtx.sendBroadcast(filterRes);
-        Log.d(this.getClass().getName(), "latitude: " + latitude);
-        Log.d(this.getClass().getName(), "longitude: " + longitude);
-        Log.d(this.getClass().getName(), "speed: " + speed);
-        Log.d(this.getClass().getName(), "accuracy: " + accuracy);
-        Log.d(this.getClass().getName(), "provider: " + location.getProvider());
-        saveLastLoc(latitude, longitude, accuracy, time);
-        Log.d(this.getClass().getName(), "Time different: " + ((time - last_loc_time) * 1.0 / 60000));
-      /*  } else {
-            Log.d(this.getClass().getName(), "Accuracy is very hight, location not updated");
-        }*/
+        // TODO more conditions dor filters
+        if (speed > 0) {
+            Intent filterRes = new Intent();
+            filterRes.setAction(CoordinateTracker.NEW_LOCATION_INTENT);
+            filterRes.putExtra("latitude", latitude);
+            filterRes.putExtra("longitude", longitude);
+            filterRes.putExtra("speed", speed);
+            filterRes.putExtra("accuracy", accuracy);
+            filterRes.putExtra("time", time);
+            filterRes.putExtra("need_new_track", (((time - last_loc_time) * 1.0 / 60000) >= 15));
+            appCtx.sendBroadcast(filterRes);
+            Log.d(this.getClass().getName(), "latitude: " + latitude);
+            Log.d(this.getClass().getName(), "longitude: " + longitude);
+            Log.d(this.getClass().getName(), "speed: " + speed);
+            Log.d(this.getClass().getName(), "accuracy: " + accuracy);
+            Log.d(this.getClass().getName(), "provider: " + location.getProvider());
+            saveLastLoc(latitude, longitude, accuracy, time);
+            Log.d(this.getClass().getName(), "Time different: " + ((time - last_loc_time) * 1.0 / 60000));
+        } else {
+            Log.d(LOG_TAG, "Geodata received, but speed is zero, skip...");
+        }
     }
 
     private void saveLastLoc(double latitude, double longitude, double accuracy, long time) {
@@ -69,7 +70,7 @@ public class CustomLocationListener implements LocationListener {
                 .putString(LAST_LATITUDE_TAG, String.valueOf(latitude))
                 .putString(LAST_LONGITUDE_TAG, String.valueOf(longitude))
                 .putString(LAST_ACCURACY_TAG, String.valueOf(accuracy))
-                .putString(LAST_TIME_TAG, String.valueOf(time)).commit();
+                .putString(LAST_TIME_TAG, String.valueOf(time)).apply();
     }
 
 

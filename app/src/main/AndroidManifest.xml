@@ -20,7 +20,6 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -34,13 +33,15 @@
             android:name="com.coordinate_tracker.anagorny.CoordinateService"
             android:enabled="true"
             android:exported="true"
-            android:process=".coordinate_service">
+            android:process=".coordinate_service_main">
         </service>
+
         <service
             android:name="com.coordinate_tracker.anagorny.INetCheckService"
             android:enabled="true"
             android:exported="true"
-            android:process=".coordinate_service"></service>
+            android:process=".coordinate_service_check_net">
+        </service>
         <receiver
             android:enabled="true"
             android:name=".LocationReceiver" >
@@ -52,7 +53,12 @@
             android:enabled="true"
             android:name=".INetCheckReceiver">
             <intent-filter>
-                <action android:name="coordinate.tracker.intent.action.INET_ON" />
+                <action
+                    android:name="coordinate.tracker.intent.action.INET_ON" />
+
+            </intent-filter>
+            <intent-filter>
+                <action android:name="coordinate.tracker.intent.action.INET_OFF" />
             </intent-filter>
         </receiver>
     </application>

@@ -3,6 +3,7 @@ package com.coordinate_tracker.anagorny;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Created by sosnov on 17.04.15.
@@ -31,6 +32,8 @@ public class StorageAdapter {
     }
 
     public SharedPreferences getUsersStorage() {
+        Log.d("COORDINATE", "Store CONTEXT" + context
+        );
         return this.userStore;
     }
 

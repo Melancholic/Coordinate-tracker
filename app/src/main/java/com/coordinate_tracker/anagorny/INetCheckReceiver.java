@@ -6,19 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Map;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by sosnov on 20.03.15.
@@ -31,10 +28,14 @@ public class INetCheckReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent calledIntent) {
-        Log.d(LOG_TAG, "CREATE- INetCheckReceiver");
-        this.context = context;
-        storage = StorageAdapter.get(context.getApplicationContext()).getLocationsStorage();
-        updateRemote();
+        Log.d(LOG_TAG, "ON RECEIVE: "+calledIntent.getAction());
+        if ( calledIntent.getAction().equals(CoordinateTracker.CONNECTION_ON_INTENT)) {
+            this.context = context;
+            storage = StorageAdapter.get(context.getApplicationContext()).getLocationsStorage();
+            updateRemote();
+        } else if (calledIntent.getAction().equals(CoordinateTracker.CONNECTION_OFF_INTENT)) {
+            //TODO stop requests
+        }
 
     }
 
@@ -67,38 +68,36 @@ public class INetCheckReceiver extends BroadcastReceiver {
         protected JSONObject doInBackground(String... args) {
             this.key = args[1];
             this.holder = args[2];
-            DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost post = new HttpPost(args[0]);
-            post.addHeader("Authorization", "Token token=" + StorageAdapter.usersStorage().getString(Configuration.AUTH_TOKEN_KEY_NAME, ""));
-            String response = null;
             JSONObject json = new JSONObject();
             try {
+                json.put("success", false);
+                json.put("info", "Connection failed!");
                 try {
-                    json.put("success", false);
-                    json.put("info", "Connection failed!");
-                    StringEntity se = new StringEntity(holder);
-                    post.setEntity(se);
-                    post.setHeader("Accept", "application/json");
-                    post.setHeader("Content-Type", "application/json");
-
-                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
-                    response = client.execute(post, responseHandler);
-                    json = new JSONObject(response);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                    Log.e("Unknow host!", "" + e);
-                } catch (HttpResponseException e) {
-                    e.printStackTrace();
-                    Log.e("ClientProtocol", "" + e);
+                    RequestBody body = RequestBody.create(HttpAdapter.TYPE_JSON, holder);
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder()
+                            .addHeader("Accept", "application/json")
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("Authorization", "Token token=" + StorageAdapter.usersStorage().getString(Configuration.AUTH_TOKEN_KEY_NAME, ""))
+                            .url(args[0])
+                            .post(body)
+                            .build();
+                    Log.e(LOG_TAG, "Location sended on " + args[0]);
+                    Response response = client.newCall(request).execute();
+                    String jsonData = response.body().string();
+                    Log.e(LOG_TAG, "Response from: " + args[0] + " : " + (response.isSuccessful() ? "OK" : "BAD") + " (" + response.code() + ")");
+                    // Success
+                    json = new JSONObject(jsonData);
+                    // BAD CONNECTION - dont remove to local
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("IO", "" + e);
+                    json.put("success", false);
+                    json.put("info", e.getMessage());
                 }
+                // BAD JSON
             } catch (JSONException e) {
                 e.printStackTrace();
-                Log.e("JSON", "" + e);
+                Log.e(LOG_TAG, "" + e);
             }
-
             return json;
         }
 
@@ -106,18 +105,17 @@ public class INetCheckReceiver extends BroadcastReceiver {
         @Override
         protected void onPostExecute(JSONObject json) {
             try {
-                if (!json.getBoolean("success")) {
-                    Log.e(LOG_TAG, "Server return error: \"" + json.getString("info") + "\"");
-                } else {
-                    Log.i(LOG_TAG, "Success: " + json.getString("info"));
-                    storage.edit().remove(key).commit();
+                if (json.getBoolean("clear")) {
+                    Log.i(LOG_TAG, "Clear location at " + key);
+                    storage.edit().remove(key).apply();
                 }
-            } catch (Exception e) {
+                // Response does'nt include clear property (internal error, dont remove from local)
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "" + e);
+                Log.e(LOG_TAG, "Server error, don't remove from local storage" );
 
-                e.printStackTrace();
             } finally {
                 super.onPostExecute(json);
-
             }
         }
     }

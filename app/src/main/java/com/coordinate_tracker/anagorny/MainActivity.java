@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -78,7 +79,7 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences.Editor editor = userStore.edit();
         editor.remove(Configuration.AUTH_TOKEN_KEY_NAME);
         editor.remove(Configuration.UUID_TOKEN_KEY_NAME);
-        editor.commit();
+        editor.apply();
         start_login_activity();
     }
 
@@ -131,7 +132,12 @@ public class MainActivity extends ActionBarActivity {
                 logout_action();
             }
         });
-        tv.setText(Html.fromHtml("<font color='blue'>Device: " + Configuration.ID + "</font><br><hr><br>"));
+        tv.setText(Html.fromHtml("<font color='blue'>Device: " + Configuration.ID + "</font><br>"));
+        if (CoordinateTracker.isConnected()) {
+            tv.append(Html.fromHtml("Status: <font color='green'>Connected!</font><br>"));
+        } else {
+            tv.append(Html.fromHtml("Status: <font color='red'>Not connected!</font><br>"));
+        }
         tv.setMovementMethod(new ScrollingMovementMethod());
 
         SharedPreferences.Editor editor = userStore.edit();
@@ -144,6 +150,14 @@ public class MainActivity extends ActionBarActivity {
 
     private void PrintLocal() {
         TextView tv = (TextView) findViewById(R.id.textView1);
+
+        tv.setText(Html.fromHtml("<font color='blue'>Device: " + Configuration.ID + "</font><br>"));
+        if (CoordinateTracker.isConnected()) {
+            tv.append(Html.fromHtml("Status: <font color='green'>Connected!</font><br>"));
+        } else {
+            tv.append(Html.fromHtml("Status: <font color='red'>Not connected!</font><br>"));
+        }
+
         tv.append("\n\n===" + Calendar.getInstance().getTime().toString() + "===");
         SharedPreferences storage = StorageAdapter.get((CoordinateTracker) getApplicationContext()).getLocationsStorage();
         Map<String, String> locations = (Map<String, String>) storage.getAll();

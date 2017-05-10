@@ -16,19 +16,16 @@ import android.widget.Toast;
 
 import com.savagelook.android.UrlJsonAsyncTask;
 
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -180,39 +177,31 @@ public class LoginActivity extends Activity {
             super(c);
             cont = c;
         }
-        @Override
-        protected JSONObject doInBackground(String... urls) {
-            DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost post = new HttpPost(urls[0]);
-            JSONObject holder = new JSONObject();
-            String response = null;
-            JSONObject json = new JSONObject();
 
-            try {
+        protected JSONObject doInBackground(String... urls) {
+            JSONObject data = new JSONObject();
+            JSONObject json = new JSONObject();
                 try {
                     json.put("success", false);
                     json.put("info", "Something went wrong. Retry!");
-                    holder.put("logdata", calculate_hash());
-                    holder.put("uuid", devId);
-                    StringEntity se = new StringEntity(holder.toString());
-                    post.setEntity(se);
-                    post.setHeader("Accept", "application/json");
-                    post.setHeader("Content-Type", "application/json");
+                    data.put("logdata", calculate_hash());
+                    data.put("uuid", devId);
 
-                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
-                    response = client.execute(post, responseHandler);
-                    json = new JSONObject(response);
+                    RequestBody body = RequestBody.create(HttpAdapter.TYPE_JSON, data.toString());
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder()
+                            .addHeader("Accept", "application/json")
+                            .addHeader("Content-Type", "application/json")
+                            .url(urls[0])
+                            .post(body)
+                            .build();
 
-                } catch (HttpResponseException e) {
-                    e.printStackTrace();
-                    json.put("info", "Email and/or password are invalid. Retry!");
-                } catch (IOException e) {
+                    Response response = client.newCall(request).execute();
+                    String jsonData = response.body().string();
+                    json = new JSONObject(jsonData);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
             return json;
         }
 
@@ -225,6 +214,7 @@ public class LoginActivity extends Activity {
                     editor.putString(Configuration.AUTH_TOKEN_KEY_NAME, json.getJSONObject("data").getString("api_token"));
                     editor.putString(Configuration.UUID_TOKEN_KEY_NAME, devId);
                     editor.commit();
+                    ((Activity) LoginActivity.this).finish();
                 }
                 Toast.makeText(context, json.getString("info"), Toast.LENGTH_LONG).show();
             } catch (Exception e) {
@@ -232,10 +222,9 @@ public class LoginActivity extends Activity {
                 ((Activity) context).recreate();
             } finally {
                 super.onPostExecute(json);
-
             }
-            ((Activity) LoginActivity.this).finish();
         }
+
     }
 
 }
