@@ -32,14 +32,14 @@ public class INetCheckReceiver extends BroadcastReceiver {
         if ( calledIntent.getAction().equals(CoordinateTracker.CONNECTION_ON_INTENT)) {
             this.context = context;
             storage = StorageAdapter.get(context.getApplicationContext()).getLocationsStorage();
-            updateRemote();
+            syncLocalStore();
         } else if (calledIntent.getAction().equals(CoordinateTracker.CONNECTION_OFF_INTENT)) {
             //TODO stop requests
         }
 
     }
 
-    private void updateRemote() {
+    private void syncLocalStore() {
         Map<String, String> locations = (Map<String, String>) storage.getAll();
         Log.d(LOG_TAG, "LOCAL: " + locations.toString());
         try {

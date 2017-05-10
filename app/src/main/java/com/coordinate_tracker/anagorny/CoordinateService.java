@@ -19,18 +19,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CoordinateService extends Service implements INetCheckService.ConnectionServiceCallback {
     private final String LOG_TAG = "COORDINATE";
-    public static SharedPreferences userStore = StorageAdapter.usersStorage();
+    public  SharedPreferences userStore = StorageAdapter.usersStorage();
     private Context context = CoordinateTracker.getAppContext();
     private NotificationManager mNotificationManager;
     private Notification.Builder NotifyBuilder;
     private int NotifyID;
     private Timer notifyUpdaterTimer = null;
-    private int numMessages = 0;
 
     public CoordinateService() {
         super();
-//        userStore = StorageAdapter.usersStorage();
-        if (token_empty()) {
+        if (CoordinateTracker.isTokenEmpty()) {
             Log.e(LOG_TAG, "Token is empty!");
             stopSelf();
         }
@@ -49,17 +47,11 @@ public class CoordinateService extends Service implements INetCheckService.Conne
                 .setContentText("status:");
         NotifyID = new AtomicInteger(0).incrementAndGet();
 
-        Notification notification;
-        if (Build.VERSION.SDK_INT < 16)
-            notification = NotifyBuilder.getNotification();
-        else
-            notification = NotifyBuilder.build();
+        Notification notification = NotifyBuilder.build();
         startForeground(NotifyID, notification);
     }
 
-    private boolean token_empty() {
-        return userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME, "") == null || userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME, "").isEmpty();
-    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -100,9 +92,9 @@ public class CoordinateService extends Service implements INetCheckService.Conne
     public void onDestroy() {
         notifyUpdaterTimer.cancel();
         super.onDestroy();
-        userStore.edit().putBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false).apply();
+        CoordinateTracker.setConnected(false);
         stopService(new Intent(this, INetCheckService.class));
-        StorageAdapter.get(context).getUsersStorage().edit()
+        userStore.edit()
                 .remove(CustomLocationListener.LAST_LATITUDE_TAG)
                 .remove(CustomLocationListener.LAST_LONGITUDE_TAG)
                 .remove(CustomLocationListener.LAST_ACCURACY_TAG)
@@ -143,7 +135,7 @@ public class CoordinateService extends Service implements INetCheckService.Conne
         Log.d(LOG_TAG, "IsNotifyNeedUpdate " + this.toString());
         try {
             NotifyBuilder.setContentText("Service is work...");
-//            NotifyBuilder.setContentText("Status "+ ((userStore.getBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false))? "CONNECTED" : "NOT CONNECTED")+ " "+ ++numMessages);
+            Log.e (LOG_TAG, CoordinateTracker.isConnected() ? "CONNECTED" : "DISCONNECTED");
             // Because the ID remains unchanged, the existing notification is
             // updated.
             mNotificationManager.notify(
@@ -182,8 +174,8 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
     @Override
     public void hasInternetConnection() {
-        if (!userStore.getBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false)) {
-            userStore.edit().putBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, true).apply();
+        if (!CoordinateTracker.isConnected()) {
+            CoordinateTracker.setConnected(true);
             Intent filterRes = new Intent();
             filterRes.setAction(CoordinateTracker.CONNECTION_ON_INTENT);
             context.sendBroadcast(filterRes);
@@ -194,8 +186,8 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
     @Override
     public void hasNoInternetConnection() {
-        if (userStore.getBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false)) {
-            userStore.edit().putBoolean(CoordinateTracker.CONNECTED_STATUS_TAG, false).apply();
+        if (CoordinateTracker.isConnected()) {
+            CoordinateTracker.setConnected(false);
             Intent filterRes = new Intent();
             filterRes.setAction(CoordinateTracker.CONNECTION_OFF_INTENT);
             context.sendBroadcast(filterRes);

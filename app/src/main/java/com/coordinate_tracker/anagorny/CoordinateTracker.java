@@ -21,6 +21,11 @@ public class CoordinateTracker extends Application {
        return StorageAdapter.usersStorage().getBoolean(CONNECTED_STATUS_TAG, false);
     }
 
+    public static boolean isTokenEmpty() {
+        return StorageAdapter.usersStorage().getString(Configuration.AUTH_TOKEN_KEY_NAME, "") == null ||
+                StorageAdapter.usersStorage().getString(Configuration.AUTH_TOKEN_KEY_NAME, "").isEmpty();
+    }
+
     public synchronized static void setConnected(boolean connectedStatus) {
         Log.d("COORDINATE", "APP CONTEXT" + context.toString());
         StorageAdapter.usersStorage().edit().putBoolean(CONNECTED_STATUS_TAG, connectedStatus).apply();

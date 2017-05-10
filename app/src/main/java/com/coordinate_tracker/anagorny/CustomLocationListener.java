@@ -2,6 +2,7 @@ package com.coordinate_tracker.anagorny;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ public class CustomLocationListener implements LocationListener {
     public static final String LAST_LONGITUDE_TAG = "last_longitude";
     public static final String LAST_ACCURACY_TAG = "last_accuracy";
     public static final String LAST_TIME_TAG = "last_time";
+    private SharedPreferences userStore = StorageAdapter.usersStorage();
 
     @Override
     public void onLocationChanged(Location location) {
@@ -66,7 +68,7 @@ public class CustomLocationListener implements LocationListener {
 
     private void saveLastLoc(double latitude, double longitude, double accuracy, long time) {
         Context appCtx = CoordinateTracker.getAppContext();
-        StorageAdapter.get(appCtx).getUsersStorage().edit()
+        userStore.edit()
                 .putString(LAST_LATITUDE_TAG, String.valueOf(latitude))
                 .putString(LAST_LONGITUDE_TAG, String.valueOf(longitude))
                 .putString(LAST_ACCURACY_TAG, String.valueOf(accuracy))

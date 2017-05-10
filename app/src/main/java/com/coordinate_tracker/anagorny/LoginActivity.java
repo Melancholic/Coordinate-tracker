@@ -32,9 +32,9 @@ import okhttp3.Response;
  * well.
  */
 public class LoginActivity extends Activity {
+
     private final String LOG_TAG = "COORDINATE";
     private static final String TARGET_URL = Configuration.getLoginURL();
-
     public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
     /**

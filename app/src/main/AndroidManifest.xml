@@ -32,15 +32,13 @@
         <service
             android:name="com.coordinate_tracker.anagorny.CoordinateService"
             android:enabled="true"
-            android:exported="true"
-            android:process=".coordinate_service_main">
+            android:exported="true">
         </service>
 
         <service
             android:name="com.coordinate_tracker.anagorny.INetCheckService"
             android:enabled="true"
-            android:exported="true"
-            android:process=".coordinate_service_check_net">
+            android:exported="true">
         </service>
         <receiver
             android:enabled="true"

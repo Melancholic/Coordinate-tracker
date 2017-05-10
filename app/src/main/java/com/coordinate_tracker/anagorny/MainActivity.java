@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        if(token_empty()){
+        if(CoordinateTracker.isTokenEmpty()){
             action_area.setVisibility(View.INVISIBLE);
             service_stop();
             start_login_activity();
@@ -145,7 +145,7 @@ public class MainActivity extends ActionBarActivity {
         editor.remove(CustomLocationListener.LAST_LONGITUDE_TAG);
         editor.remove(CustomLocationListener.LAST_ACCURACY_TAG);
         editor.remove(CustomLocationListener.LAST_TIME_TAG);
-        editor.commit();
+        editor.apply();
     }
 
     private void PrintLocal() {
@@ -175,10 +175,6 @@ public class MainActivity extends ActionBarActivity {
         }else{
             service_start();
         }
-    }
-
-    private boolean token_empty(){
-       return userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME,"")==null || userStore.getString(Configuration.AUTH_TOKEN_KEY_NAME,"").isEmpty();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {
