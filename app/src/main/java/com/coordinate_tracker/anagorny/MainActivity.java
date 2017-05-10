@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Map;
 
 public class MainActivity extends ActionBarActivity {
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     private static final String SERVICE_STOP_TEXT = "Kill";
     private static final String SERVICE_START_TEXT = "Start";
     public static SharedPreferences userStore;
@@ -37,6 +37,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init_params();
+        Log.d(LOG_TAG, "onCreate");
     }
 
 
@@ -51,6 +52,7 @@ public class MainActivity extends ActionBarActivity {
             action_area.setVisibility(View.VISIBLE);
             service_start();
         }
+        Log.d(LOG_TAG, "onResume");
     }
 
     private void start_login_activity() {

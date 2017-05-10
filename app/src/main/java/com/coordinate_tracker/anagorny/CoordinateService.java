@@ -18,7 +18,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CoordinateService extends Service implements INetCheckService.ConnectionServiceCallback {
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     public  SharedPreferences userStore = StorageAdapter.usersStorage();
     private Context context = CoordinateTracker.getAppContext();
     private NotificationManager mNotificationManager;
@@ -29,15 +29,12 @@ public class CoordinateService extends Service implements INetCheckService.Conne
     public CoordinateService() {
         super();
         if (CoordinateTracker.isTokenEmpty()) {
-            Log.e(LOG_TAG, "Token is empty!");
             stopSelf();
         }
     }
 
     public void onCreate() {
         super.onCreate();
-        Log.d(LOG_TAG, "onCreate");
-        Log.d(LOG_TAG, "onCreate " + this.toString());
 
         mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -49,6 +46,8 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
         Notification notification = NotifyBuilder.build();
         startForeground(NotifyID, notification);
+
+        Log.d(LOG_TAG, "onCreate");
     }
 
 
@@ -132,10 +131,9 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
     //TODO
     private void IsNotifyNeedUpdate() {
-        Log.d(LOG_TAG, "IsNotifyNeedUpdate " + this.toString());
         try {
-            NotifyBuilder.setContentText("Service is work...");
-            Log.e (LOG_TAG, CoordinateTracker.isConnected() ? "CONNECTED" : "DISCONNECTED");
+            NotifyBuilder.setContentText(CoordinateTracker.isConnected() ? "Connected" : "Connecting....");
+            //Log.e (LOG_TAG, );
             // Because the ID remains unchanged, the existing notification is
             // updated.
             mNotificationManager.notify(
@@ -162,7 +160,6 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
                     CustomLocationListener ll = new CustomLocationListener();
                     lm.requestLocationUpdates(PROVIDER, 5000, 3, ll);
-                    Log.d("LOC_SERVICE", "Service RUNNING!");
                     Looper.loop();
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -181,7 +178,6 @@ public class CoordinateService extends Service implements INetCheckService.Conne
             context.sendBroadcast(filterRes);
         }
         Log.d("NET", "INET ON");
-        Log.d(LOG_TAG, "NET  " + CoordinateTracker.isConnected());
     }
 
     @Override
@@ -193,7 +189,5 @@ public class CoordinateService extends Service implements INetCheckService.Conne
             context.sendBroadcast(filterRes);
         }
         Log.d(LOG_TAG, "INET OFF");
-        Log.d(LOG_TAG, "NET  " + CoordinateTracker.isConnected());
-
     }
 }

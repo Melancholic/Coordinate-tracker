@@ -33,7 +33,7 @@ import okhttp3.Response;
  */
 public class LoginActivity extends Activity {
 
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     private static final String TARGET_URL = Configuration.getLoginURL();
     public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 

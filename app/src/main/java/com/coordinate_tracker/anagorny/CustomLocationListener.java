@@ -15,7 +15,7 @@ import java.util.TimeZone;
  * Created by sosnov on 20.03.15.
  */
 public class CustomLocationListener implements LocationListener {
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     public static final String LAST_LATITUDE_TAG = "last_latitude";
     public static final String LAST_LONGITUDE_TAG = "last_longitude";
     public static final String LAST_ACCURACY_TAG = "last_accuracy";
@@ -34,8 +34,6 @@ public class CustomLocationListener implements LocationListener {
         last_loc.setLongitude(Double.parseDouble(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_LONGITUDE_TAG, String.valueOf(location.getLongitude()))));
         last_loc.setAccuracy(Float.parseFloat(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_ACCURACY_TAG, String.valueOf(location.getAccuracy()))));
         long last_loc_time = Long.parseLong(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_TIME_TAG, "0"));
-        Log.e(this.getClass().getName(), "LAST:   " + last_loc.getLatitude() + " " + last_loc.getLongitude());
-        Log.e(this.getClass().getName(), "Distance:  " + location.distanceTo(last_loc));
 
         latitude = location.getLatitude();
         longitude = location.getLongitude();
@@ -54,13 +52,8 @@ public class CustomLocationListener implements LocationListener {
             filterRes.putExtra("time", time);
             filterRes.putExtra("need_new_track", (((time - last_loc_time) * 1.0 / 60000) >= 15));
             appCtx.sendBroadcast(filterRes);
-            Log.d(this.getClass().getName(), "latitude: " + latitude);
-            Log.d(this.getClass().getName(), "longitude: " + longitude);
-            Log.d(this.getClass().getName(), "speed: " + speed);
-            Log.d(this.getClass().getName(), "accuracy: " + accuracy);
-            Log.d(this.getClass().getName(), "provider: " + location.getProvider());
             saveLastLoc(latitude, longitude, accuracy, time);
-            Log.d(this.getClass().getName(), "Time different: " + ((time - last_loc_time) * 1.0 / 60000));
+            Log.d(LOG_TAG, "Geodata received and successfully sended to handler");
         } else {
             Log.d(LOG_TAG, "Geodata received, but speed is zero, skip...");
         }

@@ -15,9 +15,10 @@ public class CoordinateTracker extends Application {
     public static final String CONNECTION_ON_INTENT = "coordinate.tracker.intent.action.INET_ON";
     public static final String CONNECTION_OFF_INTENT = "coordinate.tracker.intent.action.INET_OFF";
     public static final String NEW_LOCATION_INTENT = "coordinate.tracker.intent.action.LOCATION";
+    public static final String LOG_TAG = "Coordinate-tracker";
+
 
     public static boolean isConnected() {
-        Log.d("COORDINATE", "APP CONTEXT" + context.toString());
        return StorageAdapter.usersStorage().getBoolean(CONNECTED_STATUS_TAG, false);
     }
 
@@ -27,7 +28,6 @@ public class CoordinateTracker extends Application {
     }
 
     public synchronized static void setConnected(boolean connectedStatus) {
-        Log.d("COORDINATE", "APP CONTEXT" + context.toString());
         StorageAdapter.usersStorage().edit().putBoolean(CONNECTED_STATUS_TAG, connectedStatus).apply();
     }
 

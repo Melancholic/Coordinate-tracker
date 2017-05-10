@@ -21,7 +21,7 @@ import okhttp3.Response;
  * Created by sosnov on 20.03.15.
  */
 public class INetCheckReceiver extends BroadcastReceiver {
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     private Context context;
     private SharedPreferences storage;
     private final String TARGET_URL = Configuration.getReciveURL();

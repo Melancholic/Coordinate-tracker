@@ -19,7 +19,7 @@ import okhttp3.Request;
  * Created by sosnov on 20/03/15.
  */
 public class INetCheckService extends Service {
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     public static String TAG_INTERVAL = "interval";
     public static String TAG_URL_PING = "url_ping";
     public static String TAG_ACTIVITY_NAME = "activity_name";

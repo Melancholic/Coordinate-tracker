@@ -9,7 +9,7 @@ import android.util.Log;
  * Created by sosnov on 17.04.15.
  */
 public class StorageAdapter {
-    private final String LOG_TAG = "COORDINATE";
+    private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     static private StorageAdapter instance;
     private final SharedPreferences locationStore;
     private SharedPreferences userStore;
@@ -32,8 +32,6 @@ public class StorageAdapter {
     }
 
     public SharedPreferences getUsersStorage() {
-        Log.d("COORDINATE", "Store CONTEXT" + context
-        );
         return this.userStore;
     }
 
