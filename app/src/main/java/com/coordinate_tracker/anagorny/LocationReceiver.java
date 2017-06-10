@@ -26,7 +26,8 @@ import okhttp3.Response;
 public class LocationReceiver extends BroadcastReceiver {
     private final String LOG_TAG = CoordinateTracker.LOG_TAG +": "+this.getClass().getSimpleName();
     private double latitude, longitude;
-    private short speed, accuracy;
+    private float speed;
+    private short accuracy;
     private long time;
     private Context context;
     private SharedPreferences storage;
@@ -41,7 +42,7 @@ public class LocationReceiver extends BroadcastReceiver {
         latitude = calledIntent.getDoubleExtra("latitude", -1);
         longitude = calledIntent.getDoubleExtra("longitude", -1);
         accuracy = calledIntent.getShortExtra("accuracy", (short) -1);
-        speed = calledIntent.getShortExtra("speed", (short) -1);
+        speed = calledIntent.getFloatExtra("speed", -1f);
         time = calledIntent.getLongExtra("time", Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis());
         if (calledIntent.getBooleanExtra("need_new_track", false)) {
             //TODO make request for create new track

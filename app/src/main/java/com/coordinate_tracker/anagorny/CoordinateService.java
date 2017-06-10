@@ -139,9 +139,9 @@ public class CoordinateService extends Service implements INetCheckService.Conne
 
             NotifyBuilder.setWhen(System.currentTimeMillis());
             String content = "Status: ";
-            String info ="";
+            String info =  "";
             String city = userStore.getString(CustomLocationListener.LAST_CITY_TAG, "");
-            short speed = (short)userStore.getInt(CustomLocationListener.LAST_SPEED_TAG, 0);
+            int speed = Math.round(userStore.getFloat(CustomLocationListener.LAST_SPEED_TAG, 0)*3.6f);
             int localStoreSize = StorageAdapter.get().getLocationsStorage().getAll().size();
 
             if(CoordinateTracker.isConnected()) {

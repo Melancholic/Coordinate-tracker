@@ -37,7 +37,8 @@ public class CustomLocationListener implements LocationListener {
         Context appCtx = CoordinateTracker.getAppContext();
         Log.d(LOG_TAG, appCtx.toString());
         double latitude, longitude;
-        short speed, accuracy;
+        float speed;
+        short accuracy;
         long time;
         Location last_loc = new Location("last location");
         last_loc.setLatitude(Double.parseDouble(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_LATITUDE_TAG, String.valueOf(location.getLatitude()))));
@@ -46,7 +47,7 @@ public class CustomLocationListener implements LocationListener {
         long last_loc_time = Long.parseLong(StorageAdapter.get(appCtx).getUsersStorage().getString(LAST_TIME_TAG, "0"));
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        speed = (short)Math.round(location.getSpeed());
+        speed = location.getSpeed();
         accuracy = (short)Math.round(location.getAccuracy());
         time = Calendar.getInstance(TimeZone.getTimeZone("utc")).getTimeInMillis();
 
@@ -68,7 +69,7 @@ public class CustomLocationListener implements LocationListener {
         }
     }
 
-    private void saveLastLoc(double latitude, double longitude, double accuracy, long time, short speed) {
+    private void saveLastLoc(double latitude, double longitude, double accuracy, long time, float speed) {
         Context appCtx = CoordinateTracker.getAppContext();
         String city;
         try {
@@ -82,7 +83,7 @@ public class CustomLocationListener implements LocationListener {
                 .putString(LAST_LONGITUDE_TAG, String.valueOf(longitude))
                 .putString(LAST_ACCURACY_TAG, String.valueOf(accuracy))
                 .putString(LAST_CITY_TAG, city)
-                .putInt(LAST_SPEED_TAG, speed)
+                .putFloat(LAST_SPEED_TAG, speed)
                 .putString(LAST_TIME_TAG, String.valueOf(time)).apply();
     }
 
